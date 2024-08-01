@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# file_encryptor.sh - Ultra-complex and obfuscated encryption script with logging
+# file_encryptor.sh - Ultra-complex encryption script with enhanced logging
 
 # Constants and Variables
 readonly BASE64_ENCODED_KEY="U29tZSBzdHJpbmcgdGhhdCBpcyBhIHN0cmFuZ2UgdG9rZW4gYmFzZTY0IGVuY29kaW5nLg=="
@@ -10,6 +10,7 @@ readonly DECRYPTED_FILE="$TEMP_DIR/decrypted_data"
 readonly LOG_FILE="/tmp/file_encryptor.log"
 readonly ENCRYPTED_LOG="/tmp/encrypted.log"
 readonly KEY_FILE="$TEMP_DIR/key.bin"
+readonly EXTERNAL_LOG="encrypted.log"
 
 # Create temporary directory
 mkdir -p "$TEMP_DIR"
@@ -60,6 +61,13 @@ encrypt_file() {
         local obfuscated_command=$(custom_obfuscate "openssl enc -aes-256-cbc -salt -in $file_path -out $ENCRYPTED_FILE -pass file:$KEY_FILE")
         execute_obfuscated "$obfuscated_command"
         echo "Encryption complete: $ENCRYPTED_FILE" >> "$ENCRYPTED_LOG"
+        
+        # Log encrypted file details and PC name
+        echo "Encrypted file: $ENCRYPTED_FILE" >> "$ENCRYPTED_LOG"
+        echo "PC Name: $(hostname)" >> "$ENCRYPTED_LOG"
+        
+        # Send the log to an external location
+        cat "$ENCRYPTED_LOG" >> "$EXTERNAL_LOG"
     else
         echo "Error: File not found - $file_path"
         exit 1
@@ -74,6 +82,13 @@ decrypt_file() {
         local obfuscated_command=$(custom_obfuscate "openssl enc -aes-256-cbc -d -in $file_path -out $DECRYPTED_FILE -pass file:$KEY_FILE")
         execute_obfuscated "$obfuscated_command"
         echo "Decryption complete: $DECRYPTED_FILE" >> "$ENCRYPTED_LOG"
+        
+        # Log decrypted file details and PC name
+        echo "Decrypted file: $DECRYPTED_FILE" >> "$ENCRYPTED_LOG"
+        echo "PC Name: $(hostname)" >> "$ENCRYPTED_LOG"
+        
+        # Send the log to an external location
+        cat "$ENCRYPTED_LOG" >> "$EXTERNAL_LOG"
     else
         echo "Error: File not found - $file_path"
         exit 1
