@@ -41,7 +41,7 @@ AccessLag provides a suite of scripts for educational simulations in cybersecuri
 2. **Run the Termux Installation Script**:
 
    ```sh
-   bash termux-install.sh
+   bash fortermux/termux-install.sh
    ```
 
 ## Usage
