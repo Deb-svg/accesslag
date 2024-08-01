@@ -1,0 +1,59 @@
+name: Install Dependencies and Run Script
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Update and install packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            curl \
+            wget \
+            git \
+            vim \
+            nano \
+            htop \
+            net-tools \
+            build-essential \
+            python3-pip \
+            python3-venv \
+            npm \
+            software-properties-common
+
+      - name: Install Python packages
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Node.js packages
+        run: |
+          npm install
+
+      - name: Display installed packages
+        run: |
+          dpkg -l | grep -E 'curl|wget|git|vim|nano|htop|net-tools|build-essential|python3-pip|python3-venv|npm'
+          python3 -m pip list
+          npm list --depth=0
+
+      - name: Run cmds.sh
+        run: |
+          chmod +x cmds.sh
+          ./cmds.sh install
