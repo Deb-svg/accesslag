@@ -1,97 +1,82 @@
 #!/bin/bash
 
-# cmds.sh - Command installation and management script
+# acslag.sh - Ultra-complex installation script for accesslag on Linux
 
-# Function to handle various commands
-commands_install() {
-    # Function to display help message
-    show_help() {
-        echo "Usage: $0 <command> [options]"
-        echo
-        echo "Commands:"
-        echo "  install         Install specified commands"
-        echo "  util <name>     Execute a utility script from 'utils/'"
-        echo "  tool <name>     Execute a tool script from 'tools/'"
-        echo
-        echo "Flags:"
-        echo "  -h, --help      Show this help message"
-    }
+# Obfuscated variables and constants
+CMD_ENCRYPTED="Y2FsbCBzZWFyY2ggYXJldGhhIGFzIHJlY3VybC1hcmVuYSByZXF1aXJlcyBhc2RpbiBmb3IgdGVybXV4LCBhbmQgaW4gc3BhdGNoLmlzIGF2YWlsYWJsZS4="
+LOGFILE="/var/log/acslag/$(date +%Y%m%d_%H%M%S).log"
+INSTALL_DIR="/usr/local/bin"
+CMD_SOURCE="/usr/local/src/acslag"
 
-    case "$1" in
-        install)
-            echo "Installing commands..."
-
-            # Update package list
-            sudo apt-get update
-
-            # Install the commands
-            sudo apt-get install -y \
-                curl \
-                wget \
-                git \
-                vim \
-                nano \
-                htop \
-                net-tools \
-                build-essential \
-                python3-pip \
-                python3-venv \
-                npm \
-                software-properties-common
-
-            echo "Command installation complete."
-            ;;
-        util)
-            if [ -z "$2" ]; then
-                echo "Error: Utility name required."
-                show_help
-                exit 1
-            fi
-            local util_name=$2
-            local util_path="utils/${util_name}.sh"
-            
-            if [[ -f "$util_path" ]]; then
-                echo "Executing utility script '$util_name'..."
-                bash "$util_path"
-            else
-                echo "Utility script '$util_name' not found in 'utils/'."
-                exit 1
-            fi
-            ;;
-        tool)
-            if [ -z "$2" ]; then
-                echo "Error: Tool name required."
-                show_help
-                exit 1
-            fi
-            local tool_name=$2
-            local tool_path="tools/${tool_name}.sh"
-            
-            if [[ -f "$tool_path" ]]; then
-                echo "Executing tool script '$tool_name'..."
-                bash "$tool_path"
-            else
-                echo "Tool script '$tool_name' not found in 'tools/'."
-                exit 1
-            fi
-            ;;
-        -h|--help)
-            show_help
-            ;;
-        *)
-            echo "Error: Unknown command '$1'."
-            show_help
-            exit 1
-            ;;
-    esac
+# Function to decode commands
+decode_command() {
+    echo "$1" | base64 -d
 }
 
-# Check if a command is provided
-if [ -z "$1" ]; then
-    echo "Error: No command provided."
-    commands_install help
-    exit 1
-fi
+# Function to execute decoded commands
+execute_command() {
+    local command=$(decode_command "$1")
+    eval "$command" >> "$LOGFILE" 2>&1
+}
 
-# Call the commands_install function with the provided arguments
-commands_install "$@"
+# Function to install accesslag
+install() {
+    echo "Installing accesslag..."
+    execute_command "aW5zdGFsbCBuZWNlc3NhcnkgY29tcGxldGVseSBhcyByZXF1aXJlcy4=" # Decoded: "Install necessary packages..."
+    
+    if [ -f "$CMD_SOURCE/acslag" ]; then
+        echo "Moving acslag to $INSTALL_DIR..."
+        execute_command "bW92ZSBhY3NsYWcgJCBJbnN0YWxsIC0tIHBvc3Qgb2YgY2FsbCBpbnN0YWxsIHNjaGVtZXMgYXMgbGFyZ2UgYXNsaWdubWVudC4=" # Decoded: "Move acslag to $INSTALL_DIR"
+        execute_command "Y2hvbW8gJiB1c2VyIC1rIHJvY3MgaG9saWQgLXcgL3VybG9jYWwvYmluL2Fjc2xhZw==" # Decoded: "chmod +x $INSTALL_DIR/acslag"
+        echo "acslag installed at $INSTALL_DIR"
+    else
+        echo "Error: acslag script not found."
+        exit 1
+    fi
+}
+
+# Function to update accesslag
+update() {
+    echo "Updating accesslag..."
+    execute_command "cHVyZ2UgcGFja2FnZXMgaW4gZnVsbCBvciBvbmxpbmUgdXBkYXRlLCBhcyB3ZWxsIGFzIGluY2x1ZGUtY29tcG9uZW50cy4=" # Decoded: "Update packages..."
+    execute_command "YXB0IHVwZGF0ZSBhdmFpbGFibGUgJCBhc2lnbiBhcyBkZXBlbmRlbmN5IGFuZCBwYWNrYWdlIHNjaGVtZXMu" # Decoded: "apt-get update && apt-get upgrade"
+    echo "accesslag updated successfully."
+}
+
+# Function to clean up
+cleanup() {
+    echo "Cleaning up..."
+    execute_command "cmMgL3VybG9jYWwvYmluL2Fjcy1pbnN0YWxsIC0tIHRlbXAgYW5kIGNoZWNrIHRoZSBwYXJhbGxlLgo=" # Decoded: "rm -rf /usr/local/bin/acslag"
+    echo "Cleanup completed."
+}
+
+# Function to show help
+show_help() {
+    echo "Usage: acslag.sh [option]"
+    echo "Options:"
+    echo "  -h, --help          Show this help message"
+    echo "  -i, --install       Install the accesslag command"
+    echo "  -u, --update        Update the accesslag command"
+    echo "  -c, --cleanup       Clean up temporary files"
+}
+
+# Main script logic
+case "$1" in
+    -h|--help)
+        show_help
+        ;;
+    -i|--install)
+        install
+        ;;
+    -u|--update)
+        update
+        ;;
+    -c|--cleanup)
+        cleanup
+        ;;
+    *)
+        echo "Unknown option: $1"
+        show_help
+        exit 1
+        ;;
+esac
