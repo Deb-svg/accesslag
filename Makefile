@@ -19,16 +19,16 @@ all: build
 # Build linux target
 build_linux: check_dependencies validate_scripts configure_environment compile_code
 	@echo "Building for Linux project..."
-  chmod +x forlinux/install.sh
-  ./forlinux/install.sh
-  @echo "Successfully building project for Linux."
+  	chmod +x forlinux/install.sh
+  	./forlinux/install.sh
+  	@echo "Successfully building project for Linux."
 
 # Build termux target
 build_linux: check_dependencies validate_scripts configure_environment compile_code
 	@echo "Building for Termux project..."
-  chmod +x fortermux/termux-install.sh
-  ./fortermux/termux-install.sh
-  @echo "Successfully building project for Termux."
+  	chmod +x fortermux/termux-install.sh
+  	./fortermux/termux-install.sh
+  	@echo "Successfully building project for Termux."
 
 # Check for required dependencies
 check_dependencies:
