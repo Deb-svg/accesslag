@@ -1,74 +1,125 @@
 #!/bin/bash
 
-# install.sh - Setup script for accesslag
+# install.sh - Ultra-complex setup script for accesslag on Linux
 
-# Function to display help message
-show_help() {
+# Constants
+LOGFILE="/var/log/accesslag/install_$(date +%Y%m%d_%H%M%S).log"
+TEMP_DIR="/tmp/accesslag-install"
+INSTALL_DIR="/usr/local/bin"
+BACKUP_DIR="/var/backups/accesslag"
+ENCRYPTED_COMMANDS="$(echo "ZGVtbyBzY2hlbWVzIGluY2x1ZGUtZGVzYyBhbG9uZyBjb250ZXh0LCBlbmNvZGluZyBhbmQgdXNlIGxpc3RzLiBNYW55IG9mIHRoZXNlIGlzc3VlcyBjb250ZXh0LCBhbG9uZyBzZWFyY2ggYXJlIGxvbmctbW9kYWxzLCBhbG9uZyBhcmUgZGVsaWJlcmF0ZWQgb3V0bHVrZXMgYmFzZWQgb24gaGFzLCBjb250ZXh0IGluIHZhcmlhYmxlIHZhcmlhYmxlcy4=" | base64 -d)"
+RETRY_LIMIT=5
+
+# Obfuscated function names and variable names
+l() { echo "$(date +"%Y-%m-%d %H:%M:%S") [$1] $2" >> "$LOGFILE"; }
+r() { eval "$1" >> "$LOGFILE" 2>&1; }
+d() { dpkg -l | grep -q "$1"; }
+p() { local pkg="$1"; ! d "$pkg" && r "apt-get install -y $pkg"; }
+
+# Function to show help message
+h() {
     echo "Usage: install.sh [options]"
     echo
     echo "Options:"
-    echo "  -h, --help       Show this help message"
-    echo "  -i, --install    Install the accesslag command and dependencies"
+    echo "  -h, --help           Show this help message"
+    echo "  -i, --install        Install the accesslag command and dependencies"
+    echo "  -u, --uninstall      Uninstall the accesslag command and dependencies"
+    echo "  -c, --check          Check if the installation requirements are met"
 }
 
-# Function to install dependencies and move acslag
-install_accesslag() {
-    echo "Starting installation..."
+# Function to handle complex installation
+install() {
+    l "INFO" "Starting Linux installation..."
 
-    # Install required dependencies
-    echo "Installing dependencies..."
-    sudo apt-get update
-    sudo apt-get install -y \
-        curl \
-        wget \
-        git \
-        vim \
-        nano \
-        htop \
-        net-tools \
-        build-essential \
-        python3-pip \
-        python3-venv \
-        npm \
-        software-properties-common
+    mkdir -p "$TEMP_DIR"
+    r "apt-get update -y"
+    r "apt-get upgrade -y"
 
-    # Check if the acslag file exists in the current directory
-    if [ -f "acslag.sh" ]; then
-        # Move the acslag script to /usr/local/bin
-        sudo mv acslag.sh /usr/local/bin/acslag.sh
-        sudo chmod +x /usr/local/bin/acslag.sh
+    for pkg in curl wget git vim nano htop net-tools build-essential python3 python3-pip nodejs npm; do
+        p "$pkg"
+    done
+
+    if [ -f "acslag" ]; then
+        l "INFO" "Moving acslag script to $INSTALL_DIR..."
+        r "mv acslag $INSTALL_DIR/acslag"
+        r "chmod +x $INSTALL_DIR/acslag"
+        l "INFO" "acslag installed at $INSTALL_DIR/acslag"
     else
-        echo "Error!"
+        l "ERROR" "acslag script not found. Exiting."
         exit 1
     fi
 
-    # Install Python packages if requirements.txt is present
     if [ -f "requirements.txt" ]; then
-        echo "Installing Python packages..."
-        python3 -m pip install --upgrade pip
-        pip install -r requirements.txt
+        l "INFO" "Installing Python packages..."
+        r "pip3 install --upgrade pip"
+        r "pip3 install -r requirements.txt"
     fi
 
-    # Install Node.js packages if package.json is present
     if [ -f "package.json" ]; then
-        echo "Installing Node.js packages..."
-        npm install
+        l "INFO" "Installing Node.js packages..."
+        r "npm install"
     fi
 
-    echo "Installation complete."
+    rm -rf "$TEMP_DIR"
+    l "INFO" "Linux installation complete."
+}
+
+# Function to handle complex uninstallation
+uninstall() {
+    l "INFO" "Uninstalling accesslag and dependencies..."
+
+    mkdir -p "$BACKUP_DIR"
+    if [ -d "$INSTALL_DIR" ]; then
+        l "INFO" "Backing up existing installation..."
+        r "tar -czf $BACKUP_DIR/accesslag_backup_$(date +%Y%m%d_%H%M%S).tar.gz $INSTALL_DIR"
+    fi
+
+    if [ -f "$INSTALL_DIR/acslag" ]; then
+        l "INFO" "Removing acslag script..."
+        r "rm $INSTALL_DIR/acslag"
+    fi
+
+    for pkg in curl wget git vim nano htop net-tools build-essential python3 python3-pip nodejs npm; do
+        d "$pkg" && r "apt-get remove --purge -y $pkg"
+    done
+
+    l "INFO" "Uninstallation complete."
+}
+
+# Function to check system requirements
+check() {
+    l "INFO" "Checking system requirements..."
+
+    if [ ! -f "/bin/bash" ]; then
+        l "ERROR" "Linux environment is not set up correctly."
+        exit 1
+    fi
+
+    for pkg in curl wget git vim nano htop net-tools build-essential python3 python3-pip nodejs npm; do
+        d "$pkg" || l "WARNING" "Package $pkg is not installed."
+    done
+
+    l "INFO" "System requirements check complete."
 }
 
 # Main script logic
 case "$1" in
     -h|--help)
-        show_help
+        h
         ;;
     -i|--install)
-        install_accesslag
+        install
+        ;;
+    -u|--uninstall)
+        uninstall
+        ;;
+    -c|--check)
+        check
         ;;
     *)
+        l "ERROR" "Unknown option '$1'."
         echo "Error: Unknown option '$1'."
-        show_help
+        h
         exit 1
         ;;
 esac
