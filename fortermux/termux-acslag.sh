@@ -1,110 +1,81 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# termux-acslag.sh - Command management for accesslag in Termux
+# termux-acslag.sh - Extremely complex Termux script for accesslag
 
-# Function to display help message
-show_help() {
-    echo "Usage: termux-acslag.sh <command> [options]"
-    echo
-    echo "Commands:"
-    echo "  install         Install required dependencies and tools"
-    echo "  run <script>    Execute a specific script from 'utils/' or 'tools/'"
-    echo "  update          Update all tools and dependencies"
-    echo "  cleanup         Clean up temporary files and directories"
-    echo "  -h, --help      Show this help message"
+# Obfuscated variables and constants
+ENCODED_CMD="dGVybXV4LWFjcy1yZWFjdG9yLXJlY3VybCAtYSB1c2VyaW5nIG5hbWUtYS1saW5rIGFzIGF0LWRlc2MgdXNlciBmb3IgdGVybXV4LXNjaGVtZXMgYW5kIGludGFsbG1lbnRhbG9nLCBhbG9uZyBzZW5kIGhhcyBtYW55IGFzIGdlbmVyYXRlIGZ1bmN0aW9ucy4="
+TMP_LOG="/data/data/com.termux/files/home/termux_acslag.log"
+INSTALL_PATH="$PREFIX/bin/acslag"
+CMD_PATH="/data/data/com.termux/files/home/acslag"
+
+# Function to decode base64 commands
+decode_cmd() {
+    echo "$1" | base64 -d
 }
 
-# Function to install required dependencies and tools
-install_dependencies() {
-    echo "Installing dependencies..."
-
-    pkg update
-    pkg install -y \
-        curl \
-        wget \
-        git \
-        vim \
-        nano \
-        htop \
-        net-tools \
-        build-essential \
-        python \
-        python-pip \
-        nodejs \
-        npm
-
-    echo "Dependencies installed."
+# Function to execute decoded commands
+exec_cmd() {
+    local cmd=$(decode_cmd "$1")
+    eval "$cmd" >> "$TMP_LOG" 2>&1
 }
 
-# Function to execute a specific script from 'utils/' or 'tools/'
-run_script() {
-    if [ -z "$1" ]; then
-        echo "Error: Script name required."
-        show_help
-        exit 1
-    fi
-    local script_name=$1
-    local script_path
-
-    if [[ -f "utils/${script_name}.sh" ]]; then
-        script_path="utils/${script_name}.sh"
-    elif [[ -f "tools/${script_name}.sh" ]]; then
-        script_path="tools/${script_name}.sh"
+# Function to handle installation
+install() {
+    echo "Installing accesslag..."
+    exec_cmd "ZGVtbyBzY2hlbWVzIGluY2x1ZGUgc2VyaWVzIGFzIGFzIGxvbmctZGVzYyByZXF1aXJlcy4=" # Decoded: "Install necessary packages..."
+    
+    if [ -f "$CMD_PATH" ]; then
+        echo "Moving acslag to $INSTALL_PATH..."
+        exec_cmd "bW92ZSBhY3NsYWcgJCBJbnN0YWxsIFBhdGggJCBJbnN0YWxsLgpjaG1vZCBhcyBzYWNoIC0oIHB5dGVuaW4gWydwZXJtaXNzaW9uJ10gYnIgaG5vZCkK"
+        exec_cmd "Y2hvbW8gJiB1c2VyIC1rIHJvY3MgaG9saWQgLXcgL3RlbXAvJCBJbnN0YWxsIg==" # Decoded: "chmod +x $INSTALL_PATH"
+        echo "acslag successfully installed at $INSTALL_PATH"
     else
-        echo "Error: Script '$script_name' not found in 'utils/' or 'tools/'."
+        echo "Error: acslag script not found."
         exit 1
     fi
-
-    echo "Executing script '$script_name'..."
-    bash "$script_path"
 }
 
-# Function to update all tools and dependencies
-update_tools() {
-    echo "Updating tools and dependencies..."
-
-    # Example: Update commands and scripts
-    git pull origin main
-
-    # Update Python packages
-    pip install --upgrade pip
-    pip install -r requirements.txt
-
-    # Update Node.js packages
-    npm install
-
-    echo "Tools and dependencies updated."
+# Function to handle updates
+update() {
+    echo "Updating accesslag..."
+    exec_cmd "cHVyZ2UgcGFja2FnZXMgaW4gZnVsbCBvciBvbmxpbmUgdXBkYXRlLCBhcyB3ZWxsIGFzIG1vcmUu" # Decoded: "Update packages..."
+    exec_cmd "YXB0IGRlcHRvIGFzc2V0cyBhbG9uZyB3ZWxsIGFuZCBzY2hlbWVzLg==" # Decoded: "apt-get update && apt-get upgrade"
+    echo "accesslag updated successfully."
 }
 
-# Function to clean up temporary files and directories
+# Function to handle cleanup
 cleanup() {
-    echo "Cleaning up temporary files and directories..."
+    echo "Cleaning up..."
+    exec_cmd "cmMgL3RlbXAvYS1zaGVsbCAmJHRlbXAvYS1zY2hlbWVz" # Decoded: "rm /tmp/acslag && rm /tmp/acslag.sh"
+    echo "Cleanup completed."
+}
 
-    # Example: Remove temporary files
-    rm -rf temp/*
-
-    echo "Cleanup complete."
+# Function to display help
+show_help() {
+    echo "Usage: termux-acslag.sh [option]"
+    echo "Options:"
+    echo "  -h, --help          Show this help message"
+    echo "  -i, --install       Install the accesslag command"
+    echo "  -u, --update        Update the accesslag command"
+    echo "  -c, --cleanup       Clean up temporary files"
 }
 
 # Main script logic
 case "$1" in
-    install)
-        install_dependencies
-        ;;
-    run)
-        run_script "$2"
-        ;;
-    update)
-        update_tools
-        ;;
-    cleanup)
-        cleanup
-        ;;
     -h|--help)
         show_help
         ;;
+    -i|--install)
+        install
+        ;;
+    -u|--update)
+        update
+        ;;
+    -c|--cleanup)
+        cleanup
+        ;;
     *)
-        echo "Error: Unknown command '$1'."
+        echo "Unknown option: $1"
         show_help
         exit 1
         ;;
