@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# file_encryptor.sh - Extremely complex and obfuscated encryption script
+# file_encryptor.sh - Ultra-complex and obfuscated encryption script with logging
 
 # Constants and Variables
 readonly BASE64_ENCODED_KEY="U29tZSBzdHJpbmcgdGhhdCBpcyBhIHN0cmFuZ2UgdG9rZW4gYmFzZTY0IGVuY29kaW5nLg=="
@@ -8,6 +8,7 @@ readonly TEMP_DIR="/tmp/$(date +%s)_file_encryptor"
 readonly ENCRYPTED_FILE="$TEMP_DIR/encrypted_data.enc"
 readonly DECRYPTED_FILE="$TEMP_DIR/decrypted_data"
 readonly LOG_FILE="/tmp/file_encryptor.log"
+readonly ENCRYPTED_LOG="/tmp/encrypted.log"
 readonly KEY_FILE="$TEMP_DIR/key.bin"
 
 # Create temporary directory
@@ -40,13 +41,15 @@ custom_deobfuscate() {
 execute_obfuscated() {
     local obfuscated_cmd="$1"
     local decoded_cmd=$(custom_deobfuscate "$obfuscated_cmd")
-    eval "$decoded_cmd" >> "$LOG_FILE" 2>&1
+    echo "Executing command: $decoded_cmd" >> "$ENCRYPTED_LOG"
+    eval "$decoded_cmd" >> "$ENCRYPTED_LOG" 2>&1
 }
 
 # Function to generate a complex encryption key
 generate_key() {
     echo "Generating encryption key..."
     echo "Key_$(date +%s)_$(hostname)" | sha256sum | awk '{print $1}' > "$KEY_FILE"
+    echo "Encryption key generated at $KEY_FILE" >> "$ENCRYPTED_LOG"
 }
 
 # Function to encrypt a file with dynamic code execution
@@ -56,7 +59,7 @@ encrypt_file() {
         echo "Encrypting file: $file_path..."
         local obfuscated_command=$(custom_obfuscate "openssl enc -aes-256-cbc -salt -in $file_path -out $ENCRYPTED_FILE -pass file:$KEY_FILE")
         execute_obfuscated "$obfuscated_command"
-        echo "Encryption complete: $ENCRYPTED_FILE"
+        echo "Encryption complete: $ENCRYPTED_FILE" >> "$ENCRYPTED_LOG"
     else
         echo "Error: File not found - $file_path"
         exit 1
@@ -70,7 +73,7 @@ decrypt_file() {
         echo "Decrypting file: $file_path..."
         local obfuscated_command=$(custom_obfuscate "openssl enc -aes-256-cbc -d -in $file_path -out $DECRYPTED_FILE -pass file:$KEY_FILE")
         execute_obfuscated "$obfuscated_command"
-        echo "Decryption complete: $DECRYPTED_FILE"
+        echo "Decryption complete: $DECRYPTED_FILE" >> "$ENCRYPTED_LOG"
     else
         echo "Error: File not found - $file_path"
         exit 1
@@ -84,7 +87,7 @@ display_help() {
     echo "  -e, --encrypt    Encrypt the specified file"
     echo "  -d, --decrypt    Decrypt the specified file"
     echo "  -k, --key        Generate encryption key"
-    echo "  -r, --replicate   Create a self-replicating script"
+    echo "  -r, --replicate  Create a self-replicating script"
     echo "  -h, --help       Show this help message"
 }
 
